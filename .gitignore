@@ -13,6 +13,7 @@
 *.x86_64
 *.hex
 find_prime_cubes
+find_prime_cubes_seq
 
 # Debug Files
 *.dSYM/
@@ -115,6 +116,7 @@ test_results/
 coverage/
 
 # Logs (you may want to keep some logs for debugging)
+state.json
 logs/
 
 # Package files

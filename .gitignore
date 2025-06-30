@@ -1,0 +1,130 @@
+# Compiled Object Files
+*.o
+*.obj
+*.lo
+*.slo
+*.ko
+
+# Executables
+*.exe
+*.out
+*.app
+*.i*86
+*.x86_64
+*.hex
+find_prime_cubes
+
+# Debug Files
+*.dSYM/
+*.su
+*.idb
+*.pdb
+
+# Libraries
+*.lib
+*.a
+*.la
+*.lo
+*.dll
+*.so
+*.so.*
+*.dylib
+
+# Precompiled Headers
+*.gch
+*.pch
+
+# Linker output
+*.ilk
+*.map
+*.exp
+
+# Build directories (but keep include/ for headers)
+build/
+dist/
+bin/
+obj/
+Debug/
+Release/
+x64/
+x86/
+
+# CMake
+CMakeCache.txt
+CMakeFiles/
+CMakeScripts/
+Testing/
+cmake_install.cmake
+install_manifest.txt
+compile_commands.json
+CTestTestfile.cmake
+_deps
+
+# Autotools
+/Makefile.in
+/aclocal.m4
+/compile
+/configure
+/depcomp
+/install-sh
+/missing
+/stamp-h1
+/config.log
+/config.status
+/config.h
+/config.h.in
+/.deps/
+/.libs/
+/autom4te.cache/
+
+# IDE and Editor files
+.vscode/
+.vs/
+*.vcxproj
+*.vcxproj.filters
+*.vcxproj.user
+*.sln
+*.suo
+*.user
+*.userosscache
+*.sln.docstates
+.idea/
+*.swp
+*.swo
+*~
+.DS_Store
+Thumbs.db
+
+# Core dumps
+core
+core.*
+vgcore.*
+
+# Memory debugging
+*.valgrind
+*.massif
+
+# Static analysis
+*.scan
+
+# Test results
+test_results/
+*.gcda
+*.gcno
+*.gcov
+coverage/
+
+# Logs (you may want to keep some logs for debugging)
+logs/
+
+# Package files
+*.tar.gz
+*.zip
+*.7z
+*.rar
+
+# Temporary files
+*.tmp
+*.temp
+*.bak
+*.orig

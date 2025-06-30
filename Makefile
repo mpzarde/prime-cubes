@@ -18,7 +18,7 @@ build/%.o: src/%.c | build
 build:
 	mkdir -p build
 
-find_prime_cubes: build/main.o
+find_prime_cubes: build/primes_parallel.o
 	$(CC) $< -o $@ $(LDFLAGS)
 
 find_prime_cubes_seq: build/primes_sequential.o

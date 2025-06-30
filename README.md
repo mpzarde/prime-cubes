@@ -38,7 +38,7 @@ make            # builds both programs
 ### Windows (MSVC)
 
 ```powershell
-cl /openmp src\main.c /Fe:primes.exe
+.\cl /openmp src\primes_parallel.c /Fe:primes.exe
 .\primes.exe --help
 ```
 

@@ -4,11 +4,36 @@
 #include <omp.h>
 #include <time.h>
 #include <stdbool.h>
-
+#include <sys/time.h>
+#include <stdarg.h>
 // Hash set for O(1) prime lookup - using simple array with max value as index
 #define MAX_PRIME_CHECK 70000
 static bool prime_hash_set[MAX_PRIME_CHECK + 1];
 static bool hash_set_initialized = false;
+
+// Get current timestamp in Oracle format: YYYY-MM-DD HH24:MI:SS
+static void get_timestamp(char* buffer, size_t buffer_size) {
+    struct timeval tv;
+    struct tm* tm_info;
+    
+    gettimeofday(&tv, NULL);
+    tm_info = localtime(&tv.tv_sec);
+    
+    strftime(buffer, buffer_size, "%Y-%m-%d %H:%M:%S", tm_info);
+}
+
+// Printf with timestamp prefix
+static void printf_with_timestamp(const char* format, ...) {
+    char timestamp[32];
+    va_list args;
+    
+    get_timestamp(timestamp, sizeof(timestamp));
+    printf("%s ", timestamp);
+    
+    va_start(args, format);
+    vprintf(format, args);
+    va_end(args);
+}
 
 // Initialize prime hash set using Sieve of Eratosthenes
 static void init_prime_hash_set() {
@@ -179,7 +204,7 @@ int main(int argc, char **argv) {
     // Initialize prime hash set before parallel execution to avoid race conditions
     init_prime_hash_set();
     
-    printf("Searching a∈[%d,%d], b∈[%d,%d], c∈[%d,%d], d∈[%d,%d]\n", 
+    printf_with_timestamp("Starting search: a∈[%d,%d], b∈[%d,%d], c∈[%d,%d], d∈[%d,%d]\n", 
            a_min, a_max, b_min, b_max, c_min, c_max, d_min, d_max);
     printf("Total combinations: %lld\n", total_combinations);
     printf("Mode: parallel\n");
@@ -238,7 +263,7 @@ int main(int argc, char **argv) {
                         double elapsed = omp_get_wtime() - start_time;
                         double rate = global_checked / elapsed;
                         double percent = (double)global_checked / total_combinations * 100.0;
-                        printf("Progress: %lld checked (%.2f%%) — %.0f checks/sec\n", 
+                        printf_with_timestamp("Progress: %lld checked (%.2f%%) — %.0f checks/sec\n", 
                                global_checked, percent, rate);
                     }
                 }
@@ -273,7 +298,7 @@ int main(int argc, char **argv) {
     double elapsed = omp_get_wtime() - start_time;
     double rate = total_combinations / elapsed;
     
-    printf("\nDone. Checked %lld combinations in %.2f seconds.\n", total_combinations, elapsed);
+    printf_with_timestamp("Search completed. Checked %lld combinations in %.2f seconds.\n", total_combinations, elapsed);
     printf("Throughput: %.0f checks/second\n", rate);
     
     // Dump results

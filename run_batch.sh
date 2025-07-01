@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # Constants
-CHUNK_SIZE_A=1000
+CHUNK_SIZE_A=50
 A_MAX=10000
 STATE_FILE="state.json"
 
@@ -45,7 +45,7 @@ caffeinate -i ./find_prime_cubes \
   --c-range 1 10000 \
   --d-range 1 10000 \
   --workers 20 \
-  --log-interval 10000000000 \
+  --log-interval 1000000000 \
   > logs/run_${NEXT_A}-${END_A}.log 2>&1
 
 # Extract statistics from the log file

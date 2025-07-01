@@ -1,3 +1,5 @@
+.DEFAULT_GOAL := find_prime_cubes
+
 CC     ?= gcc
 CFLAGS ?= -O3 -fopenmp -march=native -mtune=native -flto
 LDFLAGS?= -fopenmp -flto
@@ -24,7 +26,7 @@ find_prime_cubes: build/primes_parallel.o
 find_prime_cubes_seq: build/primes_sequential.o
 	$(CC) $< -o $@ $(LDFLAGS)
 
-all: $(TARGETS)
+all: find_prime_cubes find_prime_cubes_seq
 
 clean:
 	rm -rf build $(TARGETS)

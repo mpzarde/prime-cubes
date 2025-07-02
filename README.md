@@ -22,9 +22,12 @@ sudo apt update
 sudo apt install build-essential libomp-dev
 ```
 
-### Windows (MSVC)
+### Windows
 
-No additional setup is required as Microsoft Visual Studio includes support for OpenMP.
+```powershell
+# Install MinGW (includes GCC with OpenMP support) and make
+scoop install mingw make
+```
 
 ## Build Instructions
 
@@ -36,11 +39,12 @@ make all                # builds both parallel and sequential versions
 ./find_prime_cubes --help # show usage options
 ```
 
-### Windows (MSVC)
+### Windows
 
 ```powershell
-.\cl /openmp src\primes_parallel.c /Fe:primes.exe
-.\primes.exe --help
+make                    # builds find_prime_cubes (default)
+make all                # builds both parallel and sequential versions
+& ".\build\primes_parallel.exe" --help # show usage options
 ```
 
 ## Usage

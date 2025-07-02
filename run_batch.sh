@@ -3,6 +3,7 @@
 # Constants
 CHUNK_SIZE_A=50
 A_MAX=10000
+DEFAULT_START_A=1  # Default starting A value when no state.json exists
 STATE_FILE="state.json"
 
 # Function to get current next_a value
@@ -10,7 +11,8 @@ get_next_a() {
     if [ -f "$STATE_FILE" ]; then
         python3 -c "import json; print(json.load(open('$STATE_FILE'))['next_a'])"
     else
-        echo "1"
+        echo "No state.json found. Starting with default A value: $DEFAULT_START_A" >&2
+        echo "$DEFAULT_START_A"
     fi
 }
 
@@ -63,7 +65,7 @@ echo "Statistics extracted: checked=$TOTAL_CHECKED, elapsed=${ELAPSED_SECONDS}s,
 
 # Append a summary line to logs/summary.log
 SUMMARY_LOG="logs/summary.log"
-echo "$(date +"%F") a_range=$NEXT_A-$END_A checked=$TOTAL_CHECKED found=$FOUND elapsed=${ELAPSED_SECONDS}s rps=${THROUGHPUT}" >> "$SUMMARY_LOG"
+echo "$(date +"%F %H:%M") a_range=$NEXT_A-$END_A checked=$TOTAL_CHECKED found=$FOUND elapsed=${ELAPSED_SECONDS}s rps=${THROUGHPUT}" >> "$SUMMARY_LOG"
 
 # Update the state file
 echo "Updating state file..."

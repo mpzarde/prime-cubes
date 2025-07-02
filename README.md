@@ -31,7 +31,8 @@ No additional setup is required as Microsoft Visual Studio includes support for 
 ### macOS/Linux
 
 ```bash
-make            # builds both programs
+make                    # builds find_prime_cubes (default)
+make all                # builds both parallel and sequential versions
 ./find_prime_cubes --help # show usage options
 ```
 
@@ -53,7 +54,7 @@ The program searches for cubes of primes within specified parameter ranges:
 ### Programs
 
 - **`find_prime_cubes`** - High-performance parallel search (main program)
-- **`find_prime_cubes_seq`** - Sequential version for performance comparison
+- **`find_prime_cubes_seq`** - Sequential version for performance comparison (build with `make all`)
 
 ### Options
 
@@ -61,7 +62,9 @@ The program searches for cubes of primes within specified parameter ranges:
 - `--b-range MIN MAX` - Range for parameter b (default: 1 20)  
 - `--c-range MIN MAX` - Range for parameter c (default: 1 20)
 - `--d-range MIN MAX` - Range for parameter d (default: 1 20)
-- `--workers N` - Number of worker threads (parallel version only)
+- `--workers N` - Number of worker threads (default: system maximum)
+- `--log-interval N` - Progress reporting interval (default: 1000000)
+- `--no-progress` - Disable progress reporting for maximum performance
 - `--help` - Show help message
 
 ### Examples
@@ -73,20 +76,40 @@ The program searches for cubes of primes within specified parameter ranges:
 # Custom ranges with 20 workers
 ./find_prime_cubes --a-range 1 50 --b-range 1 30 --workers 20
 
-# Sequential mode for performance comparison
-./find_prime_cubes_seq --a-range 1 30 --b-range 1 30
+# Large search with custom progress reporting
+./find_prime_cubes --a-range 1 100 --b-range 1 100 --log-interval 500000
 
-# Large parallel search space
-./find_prime_cubes --a-range 1 100 --b-range 1 100 --workers 20
+# Maximum performance mode (no progress output)
+./find_prime_cubes --a-range 1 100 --b-range 1 100 --no-progress
+
+# Sequential mode for performance comparison (requires make all)
+./find_prime_cubes_seq --a-range 1 30 --b-range 1 30
 ```
+
+## Batch Processing
+
+For large-scale searches, use the included batch script:
+
+```bash
+# Run a single batch chunk
+./run_batch.sh
+```
+
+The batch script:
+- Processes the search space in manageable chunks (currently 50 units of the 'a' parameter)
+- Uses a state file (`state.json`) to track which chunk to process next
+- Logs results to timestamped files in the `logs/` directory
+- Runs one chunk per execution - requires manual restart for additional chunks
+
+Note: The script processes one chunk at a time and stops. To continue with subsequent chunks, you need to run the script again.
 
 ## Performance
 
 The program uses advanced optimizations:
-- **Miller-Rabin primality testing** with precomputed small primes
+- **Sieve of Eratosthenes** precomputed prime lookup table (up to 70,000) for O(1) primality testing
 - **Early rejection** strategies (non-prime 'a', invalid permutations)
 - **Optimized cube checking order** for fastest failure detection
 - **OpenMP parallelization** across all 4 nested loops
 - **Dynamic scheduling** for optimal load balancing
 
-Typical performance: **50-100 million checks/second** on modern multi-core systems.
+Typical performance: **~3 billion checks/second** on modern multi-core systems.

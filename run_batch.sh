@@ -56,8 +56,8 @@ echo "Parsing log file: $LOG_FILE"
 TOTAL_CHECKED=$(grep -oE 'Checked [0-9]+ combinations' "$LOG_FILE" | tail -1 | grep -oE '[0-9]+' || echo "0")
 ELAPSED_SECONDS=$(grep -oE 'in [0-9]+\.[0-9]+ seconds' "$LOG_FILE" | grep -oE '[0-9]+\.[0-9]+' | head -1 || echo "0.00")
 THROUGHPUT=$(grep -oE 'Throughput: [0-9]+ checks/second' "$LOG_FILE" | grep -oE '[0-9]+' | head -1 || echo "0")
-# Count the number of prime cubes found (each cube is reported on a separate line)
-FOUND=$(grep -E '^[0-9]+\^3 \+' "$LOG_FILE" | wc -l | tr -d ' ' || echo "0")
+# Extract the number of prime cubes found from the summary line (only check last 100 lines)
+FOUND=$(tail -100 "$LOG_FILE" | grep -E 'Found [0-9]+ cubes of primes\.' | grep -oE '[0-9]+' | head -1 || echo "0")
 
 echo "Statistics extracted: checked=$TOTAL_CHECKED, elapsed=${ELAPSED_SECONDS}s, throughput=${THROUGHPUT}, found=$FOUND"
 

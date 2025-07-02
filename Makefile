@@ -24,13 +24,17 @@ else
     EXE_SUFFIX =
 endif
 
-# Set binary directory based on OS
+# Set binary directory and output path based on OS
 # On Windows: Place binaries in current directory for easier execution
 # On Unix-like systems: Place binaries in build directory to keep project root clean
 ifeq ($(OS),Windows_NT)
   BINDIR = .    # Current directory - Windows users expect executables here
+  OUTPATH = find_prime_cubes$(EXE_SUFFIX)    # Direct filename for Windows
+  OUTPATH_SEQ = primes_sequential$(EXE_SUFFIX)    # Direct filename for Windows
 else
   BINDIR = $(BUILDDIR)    # Build directory - follows Unix conventions
+  OUTPATH = $(BINDIR)/find_prime_cubes$(EXE_SUFFIX)    # Full path for Unix
+  OUTPATH_SEQ = $(BINDIR)/primes_sequential$(EXE_SUFFIX)    # Full path for Unix
 endif
 
 # macOS-specific settings
@@ -52,12 +56,12 @@ $(BUILDDIR):
 # Build parallel version
 find_prime_cubes: $(SRCDIR)/primes_parallel.c
 	$(MKDIR)
-	$(CC) $(CFLAGS) -o $(BINDIR)/find_prime_cubes$(EXE_SUFFIX) $(SRCDIR)/primes_parallel.c $(LDFLAGS)
+	$(CC) $(CFLAGS) -o $(OUTPATH) $(SRCDIR)/primes_parallel.c $(LDFLAGS)
 
 # Build sequential version (if it exists)
 find_prime_cubes_seq: $(SRCDIR)/primes_sequential.c
 	$(MKDIR)
-	$(CC) $(CFLAGS) -o $(BINDIR)/primes_sequential$(EXE_SUFFIX) $(SRCDIR)/primes_sequential.c $(LDFLAGS)
+	$(CC) $(CFLAGS) -o $(OUTPATH_SEQ) $(SRCDIR)/primes_sequential.c $(LDFLAGS)
 
 # Build all versions
 all: find_prime_cubes

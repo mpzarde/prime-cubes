@@ -4,8 +4,12 @@
 #include <omp.h>
 #include <time.h>
 #include <stdbool.h>
-#include <sys/time.h>
 #include <stdarg.h>
+#ifdef _WIN32
+#include <windows.h>
+#else
+#include <sys/time.h>
+#endif
 // Hash set for O(1) prime lookup - using simple array with max value as index
 #define MAX_PRIME_CHECK 70000
 static bool prime_hash_set[MAX_PRIME_CHECK + 1];
@@ -13,13 +17,20 @@ static bool hash_set_initialized = false;
 
 // Get current timestamp in Oracle format: YYYY-MM-DD HH24:MI:SS
 static void get_timestamp(char* buffer, size_t buffer_size) {
+#ifdef _WIN32
+    SYSTEMTIME st;
+    GetLocalTime(&st);
+    snprintf(buffer, buffer_size, "%04d-%02d-%02d %02d:%02d:%02d", 
+             st.wYear, st.wMonth, st.wDay, st.wHour, st.wMinute, st.wSecond);
+#else
     struct timeval tv;
     struct tm* tm_info;
     
     gettimeofday(&tv, NULL);
-    tm_info = localtime(&tv.tv_sec);
+    tm_info = localtime((const time_t *)&tv.tv_sec);
     
     strftime(buffer, buffer_size, "%Y-%m-%d %H:%M:%S", tm_info);
+#endif
 }
 
 // Printf with timestamp prefix

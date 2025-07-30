@@ -1,10 +1,33 @@
+param(
+  [switch]$TestMode
+)
+
 # Define script constants
 $CHUNK_SIZE_A = 50
 $A_MAX = 10000
 $DEFAULT_START_A = 5000
 
+# API configuration
+$ApiUrl = 'https://cft.truecool.com/pdash/api/upload'
+# If needed:
+# $ApiToken = 'your-token'
+
 # Define state file
 $StateFile = "state.json"
+
+# Upload-Log function
+function Upload-Log($filePath) {
+  try {
+    $body = @{
+      fileName = [IO.Path]::GetFileName($filePath)
+      fileContent = Get-Content $filePath -Raw
+    } | ConvertTo-Json
+    Invoke-RestMethod -Uri $ApiUrl -Method Post -Body $body -ContentType 'application/json' -ErrorAction Stop
+    Write-Host "Uploaded $filePath successfully"
+  } catch {
+    Write-Warning "Failed to upload ${filePath}: $($_.Exception.Message)"
+  }
+}
 
 # Function to get next A value
 function Get-NextA {
@@ -71,14 +94,25 @@ Write-Host "System sleep prevention enabled for batch execution"
 try {
     # Run the find_prime_cubes command
     $LOG_FILE = "logs/run_${NEXT_A}-${END_A}.log"
-    & ".\find_prime_cubes.exe" `
-        --a-range $NEXT_A $END_A `
-        --b-range 1 10000 `
-        --c-range 1 10000 `
-        --d-range 1 10000 `
-        --workers 12 `
-        --log-interval 1000000000 `
-        *> $LOG_FILE
+    
+    if ($TestMode) {
+        Write-Host 'TestMode: generating dummy log'
+        $sample = @"
+2025-07-30 03:00:00 [${NEXT_A},${END_A}] Starting batch...
+Found 2 cubes of primes.
+2025-07-30 03:00:05 Search completed. Checked 100 combinations in 5 seconds.
+"@
+        $sample | Set-Content $LOG_FILE
+    } else {
+        & ".\find_prime_cubes.exe" `
+            --a-range $NEXT_A $END_A `
+            --b-range 1 10000 `
+            --c-range 1 10000 `
+            --d-range 1 10000 `
+            --workers 12 `
+            --log-interval 1000000000 `
+            *> $LOG_FILE
+    }
 }
 finally {
     # Restore previous sleep state
@@ -126,3 +160,6 @@ Add-Content -Path $SUMMARY_LOG -Value $summaryLine
 Write-Host "Updating state file..."
 $NEW_NEXT_A = $END_A + 1
 Update-State $NEW_NEXT_A $A_MAX
+
+Write-Host 'Uploading batch log...'
+Upload-Log $LOG_FILE

@@ -10,6 +10,8 @@ This program searches for parameter combinations (a,b,c,d) where the expression 
 
 ### macOS
 
+Apple's Clang doesn't include OpenMP support, so Homebrew LLVM is required:
+
 ```bash
 brew update
 brew install llvm libomp
@@ -24,27 +26,56 @@ sudo apt install build-essential libomp-dev
 
 ### Windows
 
+**Option 1: Visual Studio (Recommended)**
+[Visual Studio Community](https://visualstudio.microsoft.com/vs/community/) (free) includes everything needed: MSVC compiler with OpenMP support and build tools.
+
+**Option 2: MinGW via Scoop**
+If you don't have or want Visual Studio, use [Scoop](https://scoop.sh/) package manager:
+
 ```powershell
-# Install MinGW (includes GCC with OpenMP support) and make
+# Install Scoop first (see https://scoop.sh/)
+# Then install MinGW (includes GCC with OpenMP support) and make
 scoop install mingw make
 ```
 
 ## Build Instructions
 
-### macOS/Linux
+### Using Make (Recommended)
 
 ```bash
-make                    # builds find_prime_cubes (default)
-make all                # builds both parallel and sequential versions
+# macOS/Linux
+make                    # builds find_prime_cubes (parallel version)
 ./find_prime_cubes --help # show usage options
+
+# Windows
+make                    # builds find_prime_cubes (parallel version)  
+.\find_prime_cubes.exe --help # show usage options
 ```
 
-### Windows
+### Manual Build (Alternative)
 
-```powershell
-make                    # builds find_prime_cubes (default)
-make all                # builds both parallel and sequential versions
-& ".\build\primes_parallel.exe" --help # show usage options
+If you prefer to build manually or want the sequential version:
+
+**Linux/Windows:**
+```bash
+# Parallel version with OpenMP
+clang -Wall -O3 -fopenmp -o find_prime_cubes src/primes_parallel.c -lomp
+# or with GCC
+gcc -Wall -O3 -fopenmp -o find_prime_cubes src/primes_parallel.c -lomp
+
+# Sequential version (for performance comparison)
+clang -Wall -O3 -o find_prime_cubes_seq src/primes_sequential.c
+# or with GCC
+gcc -Wall -O3 -o find_prime_cubes_seq src/primes_sequential.c
+```
+
+**macOS (requires Homebrew LLVM paths):**
+```bash
+# Parallel version with OpenMP
+clang -Wall -O3 -fopenmp -I$(brew --prefix llvm)/include -L$(brew --prefix llvm)/lib -o find_prime_cubes src/primes_parallel.c -lomp
+
+# Sequential version (for performance comparison)
+clang -Wall -O3 -o find_prime_cubes_seq src/primes_sequential.c
 ```
 
 ## Usage
@@ -58,7 +89,7 @@ The program searches for cubes of primes within specified parameter ranges:
 ### Programs
 
 - **`find_prime_cubes`** - High-performance parallel search (main program)
-- **`find_prime_cubes_seq`** - Sequential version for performance comparison (build with `make all`)
+- **`find_prime_cubes_seq`** - Sequential version for performance comparison (build manually)
 
 ### Options
 
@@ -86,7 +117,7 @@ The program searches for cubes of primes within specified parameter ranges:
 # Maximum performance mode (no progress output)
 ./find_prime_cubes --a-range 1 100 --b-range 1 100 --no-progress
 
-# Sequential mode for performance comparison (requires make all)
+# Sequential mode for performance comparison (build manually)
 ./find_prime_cubes_seq --a-range 1 30 --b-range 1 30
 ```
 

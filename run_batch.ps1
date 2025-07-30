@@ -109,7 +109,7 @@ public class SleepPreventer {
 '@
 
 # Prevent system sleep and display sleep
-$previousState = [SleepPreventer]::SetThreadExecutionState([SleepPreventer]::ES_CONTINUOUS -bor [SleepPreventer]::ES_SYSTEM_REQUIRED)
+$PREVIOUS_STATE = [SleepPreventer]::SetThreadExecutionState([SleepPreventer]::ES_CONTINUOUS -bor [SleepPreventer]::ES_SYSTEM_REQUIRED)
 Write-Host "System sleep prevention enabled for batch execution"
 
 try {
@@ -127,7 +127,7 @@ try {
 }
 finally {
     # Restore previous sleep state
-    [SleepPreventer]::SetThreadExecutionState([SleepPreventer]::ES_CONTINUOUS)
+[SleepPreventer]::SetThreadExecutionState($PREVIOUS_STATE)
     Write-Host "System sleep prevention disabled"
 }
 
@@ -164,8 +164,8 @@ Write-Host "Statistics extracted: checked=$TOTAL_CHECKED, elapsed=${ELAPSED_SECO
 # Append a summary line to logs/summary.log
 $SUMMARY_LOG = "logs/summary.log"
 $timestamp = Get-Date -Format "yyyy-MM-dd HH:mm"
-$summaryLine = "$timestamp a_range=$NEXT_A-$END_A checked=$TOTAL_CHECKED found=$FOUND elapsed=${ELAPSED_SECONDS}s rps=$THROUGHPUT"
-Add-Content -Path $SUMMARY_LOG -Value $summaryLine
+$SUMMARY_LINE = "$timestamp a_range=$NEXT_A-$END_A checked=$TOTAL_CHECKED found=$FOUND elapsed=${ELAPSED_SECONDS}s rps=$THROUGHPUT"
+Add-Content -Path $SUMMARY_LOG -Value $SUMMARY_LINE
 
 # Update the state file
 Write-Host "Updating state file..."

@@ -9,7 +9,7 @@ SRCDIR = src
 # Compiler and flags
 CC = gcc
 CFLAGS = -Wall -O3 -fopenmp
-LDFLAGS = -lomp
+LDFLAGS = -fopenmp
 
 # Detect OS for file operations and executable suffix
 ifeq ($(OS),Windows_NT)

@@ -123,98 +123,34 @@ The program searches for cubes of primes within specified parameter ranges:
 
 ## Batch Processing
 
-For large-scale searches, use the included batch script:
+For large-scale searches, use the included batch scripts:
 
 ```bash
-# Run a single batch chunk
+# Unix/Linux/macOS (bash/zsh)
 ./run_batch.sh
 ```
 
-The batch script:
-- Processes the search space in manageable chunks (currently 50 units of the 'a' parameter)
-- Uses a state file (`state.json`) to track which chunk to process next
-- Logs results to timestamped files in the `logs/` directory
-- Runs one chunk per execution - requires manual restart for additional chunks
-
-Note: The script processes one chunk at a time and stops. To continue with subsequent chunks, you need to run the script again.
-
-### Automated Daily Batch via Task Scheduler (Windows)
-
-To run the batch processing automatically on a daily schedule using Windows Task Scheduler:
-
-#### Setup Steps
-
-1. **Create a PowerShell wrapper script** (`run_batch.ps1`) that handles the batch execution
-2. **Register the task** using PowerShell's `Register-ScheduledTask` cmdlet
-3. **Configure scheduling** for daily execution at a specific time
-4. **Set up logging** to capture task execution results
-
-#### PowerShell Script Options
-
-The `run_batch.ps1` script supports the following options:
-
-- **`-UploadLatest`** - Uploads the most recent batch log file to the primes-dash API and exits without running batch processing. This option:
-  - Finds the latest `run_*.log` file in the logs directory
-  - Uploads it to the configured API endpoint
-  - Exits immediately after upload completion
-  - Useful for manual log sharing or troubleshooting
-
 ```powershell
-# Upload the latest log file only
-.\run_batch.ps1 -UploadLatest
-
-# Run normal batch processing (default)
+# Windows PowerShell
 .\run_batch.ps1
+
+# Upload latest log file only (Windows)
+.\run_batch.ps1 -UploadLatest
 ```
 
-#### Automated Log Upload
+The batch scripts:
+- Process the search space in manageable chunks (currently 50 units of the 'a' parameter)
+- Use a state file (`state.json`) to track which chunk to process next
+- Log results to timestamped files in the `logs/` directory
+- Run one chunk per execution - requires manual restart for additional chunks
 
-After each batch processing run, the script automatically uploads the generated log file to the primes-dash API for centralized monitoring and analysis. This feature is useful for:
+### Automation
 
-- Remote monitoring of batch processing progress
-- Centralized log collection and analysis
-- Real-time tracking of search results and performance metrics
+For automated execution, the scripts can be scheduled using your system's task scheduler:
+- **Unix/Linux/macOS:** Use `cron` to schedule `run_batch.sh`
+- **Windows:** Edit script variables in `run_batch.ps1` and add it to Windows Task Scheduler for daily execution
 
-#### PowerShell Commands
-
-```powershell
-# Create the scheduled task to run daily at 2:00 AM
-$Action = New-ScheduledTaskAction -Execute "powershell.exe" -Argument "-WindowStyle Hidden -ExecutionPolicy Bypass -File C:\projects\prime-cubes\run_batch.ps1"
-$Trigger = New-ScheduledTaskTrigger -Daily -At "2:00 AM"
-$Settings = New-ScheduledTaskSettingsSet -AllowStartIfOnBatteries -DontStopIfGoingOnBatteries -StartWhenAvailable
-$Principal = New-ScheduledTaskPrincipal -UserId $env:USERNAME -LogonType Interactive
-
-Register-ScheduledTask -TaskName "PrimeCubesDailyBatch" -Action $Action -Trigger $Trigger -Settings $Settings -Principal $Principal -Description "Daily automated batch processing for prime cubes search"
-
-# To upload the latest log file separately, you can run:
-# .\run_batch.ps1 -UploadLatest
-```
-
-#### Testing the Task
-
-```powershell
-# Test the task manually
-Start-ScheduledTask -TaskName "PrimeCubesDailyBatch"
-
-# Check task status
-Get-ScheduledTask -TaskName "PrimeCubesDailyBatch" | Get-ScheduledTaskInfo
-
-# View recent task history
-Get-WinEvent -FilterHashtable @{LogName='Microsoft-Windows-TaskScheduler/Operational'; ID=200,201} | Where-Object {$_.Message -match "PrimeCubesDailyBatch"} | Select-Object -First 5
-```
-
-#### Task Management
-
-```powershell
-# Remove the task if needed
-Unregister-ScheduledTask -TaskName "PrimeCubesDailyBatch" -Confirm:$false
-
-# Modify the schedule (example: change to 3:00 AM)
-$NewTrigger = New-ScheduledTaskTrigger -Daily -At "3:00 AM"
-Set-ScheduledTask -TaskName "PrimeCubesDailyBatch" -Trigger $NewTrigger
-```
-
-The task will automatically execute the batch script daily, processing one chunk of the search space and logging results to the `logs/` directory. Progress can be monitored through the generated log files and Windows Event Viewer.
+The Windows PowerShell script includes the `-UploadLatest` option to upload the most recent log file to the primes-dash API without running batch processing.
 
 ## Performance
 

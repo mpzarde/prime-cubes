@@ -1,5 +1,5 @@
 param(
-  [switch]$TestMode
+  [switch]$UploadLatest
 )
 
 # Define script constants
@@ -18,11 +18,16 @@ $StateFile = "state.json"
 # Upload-Log function
 function Upload-Log($filePath) {
   try {
-    $body = @{
-      fileName = [IO.Path]::GetFileName($filePath)
-      fileContent = Get-Content $filePath -Raw
-    } | ConvertTo-Json
-    Invoke-RestMethod -Uri $ApiUrl -Method Post -Body $body -ContentType 'application/json' -ErrorAction Stop
+    $fileContent = [System.IO.File]::ReadAllText($filePath)
+    $fileName = [IO.Path]::GetFileName($filePath)
+    
+    # Create JSON manually to properly escape the file content
+    $jsonBody = @{
+      fileName = $fileName
+      fileContent = $fileContent
+    } | ConvertTo-Json -Compress
+    
+    Invoke-RestMethod -Uri $ApiUrl -Method Post -Body $jsonBody -ContentType 'application/json' -ErrorAction Stop
     Write-Host "Uploaded $filePath successfully"
   } catch {
     Write-Warning "Failed to upload ${filePath}: $($_.Exception.Message)"
@@ -65,6 +70,22 @@ function Update-State($newNextA, $aMax) {
 # Ensure logs directory exists
 if (!(Test-Path logs)) { New-Item -ItemType Directory logs }
 
+# Handle UploadLatest option - upload most recent log file and exit
+if ($UploadLatest) {
+    Write-Host "Upload mode: Finding latest log file..."
+    $latestLog = Get-ChildItem -Path "logs" -Filter "run_*.log" -ErrorAction SilentlyContinue | Sort-Object LastWriteTime -Descending | Select-Object -First 1
+    
+    if ($latestLog) {
+        Write-Host "Found latest log: $($latestLog.Name)"
+        Upload-Log $latestLog.FullName
+    } else {
+        Write-Warning "No log files found in logs directory"
+    }
+    
+    Write-Host "Upload operation completed."
+    exit 0
+}
+
 # Get current value of next_a
 $NEXT_A = Get-NextA
 $END_A = $NEXT_A + $CHUNK_SIZE_A - 1
@@ -95,24 +116,14 @@ try {
     # Run the find_prime_cubes command
     $LOG_FILE = "logs/run_${NEXT_A}-${END_A}.log"
     
-    if ($TestMode) {
-        Write-Host 'TestMode: generating dummy log'
-        $sample = @"
-2025-07-30 03:00:00 [${NEXT_A},${END_A}] Starting batch...
-Found 2 cubes of primes.
-2025-07-30 03:00:05 Search completed. Checked 100 combinations in 5 seconds.
-"@
-        $sample | Set-Content $LOG_FILE
-    } else {
-        & ".\find_prime_cubes.exe" `
-            --a-range $NEXT_A $END_A `
-            --b-range 1 10000 `
-            --c-range 1 10000 `
-            --d-range 1 10000 `
-            --workers 12 `
-            --log-interval 1000000000 `
-            *> $LOG_FILE
-    }
+    & ".\find_prime_cubes.exe" `
+        --a-range $NEXT_A $END_A `
+        --b-range 1 10000 `
+        --c-range 1 10000 `
+        --d-range 1 10000 `
+        --workers 12 `
+        --log-interval 1000000000 `
+        *> $LOG_FILE
 }
 finally {
     # Restore previous sleep state

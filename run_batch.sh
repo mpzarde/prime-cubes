@@ -65,6 +65,16 @@ echo "Statistics extracted: checked=$TOTAL_CHECKED, elapsed=${ELAPSED_SECONDS}s,
 
 # Append a summary line to logs/summary.log
 SUMMARY_LOG="logs/summary.log"
+# Ensure the summary.log file ends with a newline before appending
+if [ -f "$SUMMARY_LOG" ] && [ -s "$SUMMARY_LOG" ]; then
+  # Check if the last character is a newline
+  if [ "$(tail -c 1 "$SUMMARY_LOG" | xxd -p)" != "0a" ]; then
+    # If not, add a newline first
+    echo "" >> "$SUMMARY_LOG"
+  fi
+fi
+
+# Append the new entry with a trailing newline
 echo "$(date +"%F %H:%M") a_range=$NEXT_A-$END_A checked=$TOTAL_CHECKED found=$FOUND elapsed=${ELAPSED_SECONDS}s rps=${THROUGHPUT}" >> "$SUMMARY_LOG"
 
 # Update the state file

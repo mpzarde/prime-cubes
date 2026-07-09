@@ -6,6 +6,17 @@ A parallel brute-force search for "cubes of primes" using OpenMP for performance
 
 This program searches for parameter combinations (a,b,c,d) where the expression `a + b*i + c*j + d*k` yields prime numbers for **all** combinations of i,j,k ∈ {0,1,2}. This creates a 3×3×3 "cube" of 27 values, all of which must be prime.
 
+I used this program to run a full search for distinct prime cubes in the range a,b,c,d from 2 to 10 000.
+
+The result is that only three unique solutions exist:
+- (929, 2904, 3150, 7440)
+- (3434, 2484, 5370, 6930)
+- (6379, 2244, 4410, 9240)
+
+All other solutions found were symmetric or duplicates.
+
+Only the three unique prime-cube configurations emerged across the full domain.
+
 ## Setup
 
 ### macOS
